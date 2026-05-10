@@ -1,0 +1,153 @@
+openapi: 3.1.0
+info:
+  title: ASSIST SMC to UCLA Articulation API
+  version: 1.0.0
+  description: >
+    Public ASSIST endpoints for Santa Monica College to UCLA 2025-2026
+    undergraduate major articulation agreements. Defaults are UCLA receiving
+    institution 117, Santa Monica College sending institution 137, academic
+    year 76 (2025-2026), report type Major.
+servers:
+  - url: https://prod.assistng.org
+paths:
+  /articulation/api/Agreements/Published/for/{receivingInstitutionId}/to/{sendingInstitutionId}/in/{academicYearId}:
+    get:
+      operationId: listUclaSmcMajorAgreements
+      summary: List published SMC to UCLA major articulation agreements
+      description: >
+        Returns published ASSIST major agreement labels and keys for a receiving
+        institution, sending institution, and academic year. Use the default
+        values for v1 unless the user explicitly asks for a different year or
+        institution pair.
+      parameters:
+        - name: receivingInstitutionId
+          in: path
+          required: true
+          description: UCLA institution id. Use 117 for v1.
+          schema:
+            type: integer
+            default: 117
+        - name: sendingInstitutionId
+          in: path
+          required: true
+          description: Santa Monica College institution id. Use 137 for v1.
+          schema:
+            type: integer
+            default: 137
+        - name: academicYearId
+          in: path
+          required: true
+          description: ASSIST academic year id. Use 76 for 2025-2026.
+          schema:
+            type: integer
+            default: 76
+        - name: types
+          in: query
+          required: true
+          description: ASSIST report type. Use Major for undergraduate major agreements.
+          schema:
+            type: string
+            enum:
+              - Major
+            default: Major
+      responses:
+        "200":
+          description: Published major agreement list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      reports:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/AgreementReport"
+                      allReports:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/AgreementReport"
+                  validationFailure:
+                    type:
+                      - object
+                      - "null"
+                  isSuccessful:
+                    type: boolean
+  /articulation/api/Agreements:
+    get:
+      operationId: getArticulationAgreement
+      summary: Get one ASSIST articulation agreement by key
+      description: >
+        Returns a detailed ASSIST articulation agreement. The result includes
+        JSON-encoded strings such as academicYear, receivingInstitution,
+        sendingInstitution, templateAssets, and articulations. Parse those
+        strings as JSON before summarizing requirements and SMC articulated
+        courses.
+      parameters:
+        - name: Key
+          in: query
+          required: true
+          description: Agreement key from listUclaSmcMajorAgreements.
+          schema:
+            type: string
+            examples:
+              - 76/137/to/117/Major/4326f498-897c-4aae-1fce-08ddcb96df9e
+      responses:
+        "200":
+          description: Detailed ASSIST articulation agreement.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/AgreementDetail"
+                  validationFailure:
+                    type:
+                      - object
+                      - "null"
+                  isSuccessful:
+                    type: boolean
+components:
+  schemas:
+    AgreementReport:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        ownerInstitutionId:
+          type: integer
+        type:
+          type: string
+    AgreementDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        publishDate:
+          type: string
+        receivingInstitution:
+          type: string
+          description: JSON-encoded receiving institution object.
+        sendingInstitution:
+          type: string
+          description: JSON-encoded sending institution object.
+        academicYear:
+          type: string
+          description: JSON-encoded academic year object.
+        templateAssets:
+          type: string
+          description: JSON-encoded list of requirement and general text assets.
+        articulations:
+          type: string
+          description: JSON-encoded list of receiving requirements and SMC sending articulations.
+        catalogYear:
+          type: string
+          description: JSON-encoded catalog year object.
+

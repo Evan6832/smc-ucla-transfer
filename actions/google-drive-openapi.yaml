@@ -1,0 +1,160 @@
+openapi: 3.1.0
+info:
+  title: Google Drive Read-Only Articulation Cache API
+  version: 1.0.0
+  description: >
+    Read-only Google Drive access for curated SMC-to-UCLA normalized
+    articulation cache documents. Configure this Action in GPT Builder with
+    OAuth using the Google Drive read-only scope.
+servers:
+  - url: https://www.googleapis.com
+security:
+  - GoogleOAuth:
+      - https://www.googleapis.com/auth/drive.readonly
+paths:
+  /drive/v3/files:
+    get:
+      operationId: searchDriveCacheFiles
+      summary: Search curated articulation cache files
+      description: >
+        Search Google Drive for normalized articulation cache files. Prefer
+        exact document-title queries. If a folder id is known, scope with
+        "'{folderId}' in parents"; otherwise search by the required document
+        name prefix "ASSIST 2025-2026 SMC to UCLA".
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: Google Drive v3 search query.
+          schema:
+            type: string
+            examples:
+              - "name contains 'ASSIST 2025-2026 SMC to UCLA' and mimeType = 'application/vnd.google-apps.document' and trashed = false"
+              - "name = 'SMC-UCLA Articulation Cache' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+              - "'FOLDER_ID' in parents and name contains 'ASSIST 2025-2026 SMC to UCLA' and mimeType = 'application/vnd.google-apps.document' and trashed = false"
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: fields
+          in: query
+          required: false
+          description: Partial response selector.
+          schema:
+            type: string
+            default: "files(id,name,mimeType,webViewLink,modifiedTime),nextPageToken"
+        - name: supportsAllDrives
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: includeItemsFromAllDrives
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        "200":
+          description: Matching Drive files.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DriveFile"
+                  nextPageToken:
+                    type: string
+  /drive/v3/files/{fileId}:
+    get:
+      operationId: getDriveFileMetadata
+      summary: Get Drive file metadata
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "id,name,mimeType,webViewLink,modifiedTime,parents"
+        - name: supportsAllDrives
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        "200":
+          description: Drive file metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriveFile"
+  /drive/v3/files/{fileId}/export:
+    get:
+      operationId: exportGoogleDocAsText
+      summary: Export a native Google Doc as plain text
+      description: >
+        Export a Google Workspace document to text/plain. Use this for normalized
+        cache documents so the GPT can read source summaries.
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: mimeType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - text/plain
+            default: text/plain
+      responses:
+        "200":
+          description: Exported plain-text document content.
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  securitySchemes:
+    GoogleOAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth
+          tokenUrl: https://oauth2.googleapis.com/token
+          scopes:
+            https://www.googleapis.com/auth/drive.readonly: Read and export curated articulation cache documents from Google Drive.
+  schemas:
+    DriveFile:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        mimeType:
+          type: string
+        webViewLink:
+          type: string
+        modifiedTime:
+          type: string
+        parents:
+          type: array
+          items:
+            type: string
