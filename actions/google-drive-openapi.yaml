@@ -4,8 +4,8 @@ info:
   version: 1.0.0
   description: >
     Read-only Google Drive access for curated SMC-to-UCLA normalized
-    articulation cache documents. Configure this Action in GPT Builder with
-    OAuth using the Google Drive read-only scope.
+    articulation cache document discovery and metadata. Configure this Action
+    in GPT Builder with OAuth using the Google Drive read-only scope.
 servers:
   - url: https://www.googleapis.com
 security:
@@ -102,34 +102,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DriveFile"
-  /drive/v3/files/{fileId}/export:
-    get:
-      operationId: exportGoogleDocAsText
-      summary: Export a native Google Doc as plain text
-      description: >
-        Export a Google Workspace document to text/plain. Use this for normalized
-        cache documents so the GPT can read source summaries.
-      parameters:
-        - name: fileId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: mimeType
-          in: query
-          required: true
-          schema:
-            type: string
-            enum:
-              - text/plain
-            default: text/plain
-      responses:
-        "200":
-          description: Exported plain-text document content.
-          content:
-            text/plain:
-              schema:
-                type: string
 components:
   securitySchemes:
     GoogleOAuth:
@@ -139,7 +111,7 @@ components:
           authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth
           tokenUrl: https://oauth2.googleapis.com/token
           scopes:
-            https://www.googleapis.com/auth/drive.readonly: Read and export curated articulation cache documents from Google Drive.
+            https://www.googleapis.com/auth/drive.readonly: Read curated articulation cache document metadata from Google Drive.
   schemas:
     DriveFile:
       type: object

@@ -38,8 +38,9 @@ Find the normalized Google Drive cache document for UCLA Psychology/B.A. and sum
 Expected:
 
 - Calls `searchDriveCacheFiles`.
-- Calls `exportGoogleDocAsText`.
+- Calls `getDriveFileMetadata`.
 - Finds `ASSIST 2025-2026 SMC to UCLA - Psychology/B.A. - Normalized`.
+- Summarizes the file name, Drive link, modified time, and known source metadata from the document title.
 
 ## Product Scenarios
 
@@ -86,4 +87,3 @@ Expected:
 - Identifies ECON 11 and ECON 41 as no-articulation items from ASSIST.
 - Does not invent SMC equivalents.
 - Includes counselor reminder.
-

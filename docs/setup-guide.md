@@ -51,7 +51,7 @@ Note: `drive.readonly` is a restricted Google scope. For an interview assessment
 3. Test `searchDriveCacheFiles` with:
    - `q`: `name contains 'ASSIST 2025-2026 SMC to UCLA' and mimeType = 'application/vnd.google-apps.document' and trashed = false`
    - `pageSize`: `10`
-4. Test `exportGoogleDocAsText` on one returned Google Doc file id.
+4. Test `getDriveFileMetadata` on one returned Google Doc file id.
 
 ## 5. Create the Drive Cache
 
